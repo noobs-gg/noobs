@@ -482,7 +482,7 @@ a { color: inherit; text-decoration: none; }
 .contact__nubi {
   position: absolute;
   top: -20px;
-  right: 0.5rem;
+  right: 0.5rem; /* stays on-screen on narrow viewports */
   width: 54px;
   height: auto;
   image-rendering: pixelated;
@@ -492,6 +492,10 @@ a { color: inherit; text-decoration: none; }
 
 @media (min-width: 640px) {
   .contact__nubi { width: 64px; }
+}
+
+@media (min-width: 900px) {
+  .contact__nubi { right: -20px; }
 }
 
 .contact__email {
