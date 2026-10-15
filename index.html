@@ -212,7 +212,7 @@
       var next = document.querySelector('.videos__arrow--next');
       if (!grid || !prev || !next) return;
       function step() {
-        var card = grid.querySelector('.tiktok-embed');
+        var card = grid.querySelector('.tiktok-embed, .tiktok-card');
         var gap = parseFloat(getComputedStyle(grid).gap) || 16;
         return (card ? card.offsetWidth : 340) + gap;
       }

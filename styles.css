@@ -300,8 +300,15 @@ a { color: inherit; text-decoration: none; }
   width: max(85vw, 325px);
   scroll-snap-align: start;
   border-radius: 18px;
-  overflow: hidden;
   border: none !important;
+}
+
+/* overflow: hidden only on cards without an iframe — applying it to
+   .tiktok-embed clips TikTok's interactive compositing layers and
+   prevents the play button from receiving pointer events. */
+.videos__grid .tiktok-card,
+.videos__grid .tiktok-fallback {
+  overflow: hidden;
 }
 
 /* Pending state: neutral placeholder before embed initialises */

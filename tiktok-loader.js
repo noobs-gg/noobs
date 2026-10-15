@@ -1,6 +1,6 @@
 /* tiktok-loader.js
    Lazy-loads TikTok embeds one at a time as they approach the carousel,
-   retries failures up to MAX_RETRIES times, then shows a fallback card. */
+   patches the iframe allow attribute, retries failures, shows a fallback. */
 
 (function () {
   'use strict';
@@ -27,7 +27,7 @@
       queue.splice(0).forEach(function (fn) { fn(); });
     };
     s.onerror = function () {
-      scriptPending = false;   // allow a future retry to re-load
+      scriptPending = false;
       queue.splice(0);
     };
     document.head.appendChild(s);
@@ -38,13 +38,36 @@
     if (window.tiktokEmbed && window.tiktokEmbed.lib) {
       try { window.tiktokEmbed.lib.render(el); return; } catch (_) {}
     }
-    /* Fallback: embed.js auto-processes on first load; for later cards
-       (added after first load) inject a fresh tag — the browser serves
-       it from cache and TikTok's script only touches un-processed elements. */
+    /* Fallback: inject a fresh (cached) script tag so TikTok processes
+       any newly added .tiktok-embed elements it hasn't seen yet. */
     var s = document.createElement('script');
     s.src = EMBED_SRC;
     s.async = true;
     document.head.appendChild(s);
+  }
+
+  /* ── Patch the iframe allow attribute once TikTok injects it ────────────── */
+  var ALLOW = 'autoplay; fullscreen; encrypted-media; picture-in-picture';
+
+  function patchIframe(iframe) {
+    var existing = (iframe.getAttribute('allow') || '').split(';')
+                     .map(function (s) { return s.trim(); }).filter(Boolean);
+    ALLOW.split(';').forEach(function (directive) {
+      var d = directive.trim();
+      if (existing.indexOf(d) === -1) existing.push(d);
+    });
+    iframe.setAttribute('allow', existing.join('; '));
+  }
+
+  function watchForIframe(el) {
+    var iframe = el.querySelector('iframe');
+    if (iframe) { patchIframe(iframe); return; }
+
+    var mo = new MutationObserver(function () {
+      var found = el.querySelector('iframe');
+      if (found) { mo.disconnect(); patchIframe(found); }
+    });
+    mo.observe(el, { childList: true, subtree: true });
   }
 
   /* ── Did the embed produce an iframe? ────────────────────────────────────── */
@@ -77,18 +100,20 @@
   /* ── Check + retry loop ──────────────────────────────────────────────────── */
   function scheduleCheck(el, retriesLeft) {
     setTimeout(function () {
-      if (hasIframe(el)) return;  // success
+      if (!el.parentNode)  return;  // element replaced or removed — stop
+      if (hasIframe(el))   return;  // loaded successfully — stop
 
       if (retriesLeft > 0) {
-        /* Replace with a completely fresh node — TikTok's script skips
-           elements it has already seen, so a new node forces re-processing. */
+        /* Replace with a completely fresh node — TikTok skips elements it
+           has already processed, so a brand-new node forces re-processing. */
         var next = document.createElement('blockquote');
         next.className = 'tiktok-embed';
         next.setAttribute('cite',          el.getAttribute('cite'));
         next.setAttribute('data-video-id', el.getAttribute('data-video-id'));
         next.setAttribute('data-title',    el.getAttribute('data-title') || '');
         next.innerHTML = '<section></section>';
-        if (el.parentNode) el.parentNode.replaceChild(next, el);
+        el.parentNode.replaceChild(next, el);
+        watchForIframe(next);
         render(next);
         scheduleCheck(next, retriesLeft - 1);
       } else {
@@ -99,11 +124,11 @@
 
   /* ── Activate a pending card ─────────────────────────────────────────────── */
   function activate(el) {
-    /* Switch from our pending class to TikTok's expected class */
     el.className = 'tiktok-embed';
     el.innerHTML = '<section></section>';
 
     withScript(function () {
+      watchForIframe(el);
       render(el);
       scheduleCheck(el, MAX_RETRIES);
     });
@@ -120,8 +145,8 @@
       activate(entry.target);
     });
   }, {
-    /* Fire when a card is within 300px of the visible carousel area
-       (horizontal margin) so it starts loading before the user swipes to it. */
+    /* Fire when a card comes within 300px of the visible carousel area
+       so it starts loading before the user swipes to it. */
     rootMargin: '0px 300px 0px 300px'
   });
 
