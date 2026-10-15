@@ -140,9 +140,8 @@
   }
 
   /* ── IntersectionObserver ────────────────────────────────────────────────── */
-  var grid  = document.querySelector('.videos__grid');
   var cards = document.querySelectorAll('.tiktok-card');
-  if (!grid || !cards.length) return;
+  if (!cards.length) return;
 
   io = new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) {
@@ -166,8 +165,7 @@
       }
     });
   }, {
-    root:       grid,          /* scoped to the carousel, not the whole page */
-    rootMargin: '0px 200px 0px 200px'  /* pre-load one card ahead */
+    rootMargin: '200px 0px'  /* start loading 200px before entering viewport */
   });
 
   cards.forEach(function (el) { io.observe(el); });
