@@ -263,15 +263,20 @@ a { color: inherit; text-decoration: none; }
   padding: 5rem 0;
 }
 
-/* Mobile: horizontal scroll carousel */
+/* Wrapper anchors the desktop arrow buttons */
+.videos__wrap {
+  position: relative;
+}
+
+/* Carousel track - always a horizontal scroll */
 .videos__grid {
   display: flex;
   gap: 1rem;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 1rem;
-  /* bleed cards to viewport edges */
+  padding-bottom: 0.5rem;
+  /* bleed to viewport edges on mobile */
   padding-inline: var(--px);
   margin-inline: calc(-1 * var(--px));
   /* hide scrollbar */
@@ -281,13 +286,13 @@ a { color: inherit; text-decoration: none; }
 
 .videos__grid::-webkit-scrollbar { display: none; }
 
-/* Trailing spacer so the last card clears the right edge on iOS */
+/* Trailing spacer ensures last card clears the right edge on iOS */
 .videos__grid::after {
   content: '';
   flex: 0 0 1px;
 }
 
-/* Each TikTok embed is a carousel card */
+/* Cards: 85vw on mobile, min 325px so TikTok embeds render fully */
 .videos__grid .tiktok-embed {
   flex: 0 0 max(85vw, 325px);
   width: max(85vw, 325px);
@@ -297,25 +302,58 @@ a { color: inherit; text-decoration: none; }
   border: none !important;
 }
 
-/* Desktop: 3-column grid */
+/* Arrow buttons: hidden on mobile (swipe is the affordance) */
+.videos__arrow { display: none; }
+
+/* Desktop: fixed-width cards, arrows visible */
 @media (min-width: 900px) {
+  /* Inset the track so arrows sit in the flanking space */
+  .videos__wrap {
+    padding-inline: 3rem;
+  }
+
   .videos__grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
-    overflow-x: visible;
     padding-inline: 0;
     margin-inline: 0;
-    padding-bottom: 0;
+    padding-bottom: 0.5rem;
   }
 
   .videos__grid::after { display: none; }
 
+  /* ~340px cards: 3 fit with the 4th just peeking in */
   .videos__grid .tiktok-embed {
-    flex: none;
-    width: 100%;
-    scroll-snap-align: none;
+    flex: 0 0 340px;
+    width: 340px;
   }
+
+  .videos__arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid rgba(37, 42, 92, 0.15);
+    color: var(--navy);
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.14s ease, color 0.14s ease, box-shadow 0.14s ease;
+  }
+
+  .videos__arrow:hover {
+    background: var(--navy);
+    color: #fff;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  }
+
+  .videos__arrow--prev { left:  0; }
+  .videos__arrow--next { right: 0; }
 }
 
 /* ── ABOUT ──────────────────────────────────────────────── */

@@ -81,42 +81,50 @@
         <span class="label">Most watched</span>
         <h2 class="section-title">Fan favorites</h2>
 
-      <div class="videos__grid">
+      <div class="videos__wrap">
+        <button class="videos__arrow videos__arrow--prev" aria-label="Scroll left">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <path d="M11 4L6 9l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
 
-        <!--
-          SWAP EACH .video-card--placeholder DIV WITH A REAL TIKTOK EMBED:
+        <div class="videos__grid">
 
           <blockquote
             class="tiktok-embed"
-            cite="https://www.tiktok.com/@noobsdotgg/video/VIDEO_ID"
-            data-video-id="VIDEO_ID">
+            cite="https://www.tiktok.com/@noobsdotgg/video/7696122052322905376"
+            data-video-id="7696122052322905376">
             <section></section>
           </blockquote>
 
-          Then uncomment the <script> tag at the bottom of this file.
-        -->
+          <blockquote
+            class="tiktok-embed"
+            cite="https://www.tiktok.com/@noobsdotgg/video/7695838578491788566"
+            data-video-id="7695838578491788566">
+            <section></section>
+          </blockquote>
 
-        <blockquote
-          class="tiktok-embed"
-          cite="https://www.tiktok.com/@noobsdotgg/video/7696122052322905376"
-          data-video-id="7696122052322905376">
-          <section></section>
-        </blockquote>
+          <blockquote
+            class="tiktok-embed"
+            cite="https://www.tiktok.com/@noobsdotgg/video/7696569020731985174"
+            data-video-id="7696569020731985174">
+            <section></section>
+          </blockquote>
 
-        <blockquote
-          class="tiktok-embed"
-          cite="https://www.tiktok.com/@noobsdotgg/video/7695838578491788566"
-          data-video-id="7695838578491788566">
-          <section></section>
-        </blockquote>
+          <blockquote
+            class="tiktok-embed"
+            cite="https://www.tiktok.com/@noobsdotgg/video/7696175965751315734"
+            data-video-id="7696175965751315734">
+            <section></section>
+          </blockquote>
 
-        <blockquote
-          class="tiktok-embed"
-          cite="https://www.tiktok.com/@noobsdotgg/video/7696175965751315734"
-          data-video-id="7696175965751315734">
-          <section></section>
-        </blockquote>
+        </div>
 
+        <button class="videos__arrow videos__arrow--next" aria-label="Scroll right">
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <path d="M7 4l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
       </div>
     </div>
   </section>
@@ -185,6 +193,25 @@
 
   <script async src="https://www.tiktok.com/embed.js"></script>
   <script defer src="nubi.js"></script>
+  <script>
+    (function () {
+      var grid = document.querySelector('.videos__grid');
+      var prev = document.querySelector('.videos__arrow--prev');
+      var next = document.querySelector('.videos__arrow--next');
+      if (!grid || !prev || !next) return;
+      function step() {
+        var card = grid.querySelector('.tiktok-embed');
+        var gap = parseFloat(getComputedStyle(grid).gap) || 16;
+        return (card ? card.offsetWidth : 340) + gap;
+      }
+      prev.addEventListener('click', function () {
+        grid.scrollBy({ left: -step(), behavior: 'smooth' });
+      });
+      next.addEventListener('click', function () {
+        grid.scrollBy({ left: step(), behavior: 'smooth' });
+      });
+    }());
+  </script>
 
 </body>
 </html>
