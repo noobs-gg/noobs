@@ -293,13 +293,46 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* Cards: 85vw on mobile, min 325px so TikTok embeds render fully */
-.videos__grid .tiktok-embed {
+.videos__grid .tiktok-embed,
+.videos__grid .tiktok-card,
+.videos__grid .tiktok-fallback {
   flex: 0 0 max(85vw, 325px);
   width: max(85vw, 325px);
   scroll-snap-align: start;
   border-radius: 18px;
   overflow: hidden;
   border: none !important;
+}
+
+/* Pending state: neutral placeholder before embed initialises */
+.tiktok-card {
+  background: rgba(37, 42, 92, 0.04);
+  min-height: 500px;
+}
+
+/* Fallback card shown after all retries are exhausted */
+.tiktok-fallback {
+  background: rgba(37, 42, 92, 0.04);
+  min-height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tiktok-fallback__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.tiktok-fallback__title {
+  font-weight: 700;
+  font-size: 1.125rem;
+  color: var(--navy);
+  line-height: 1.3;
 }
 
 /* Arrow buttons: hidden on mobile (swipe is the affordance) */
@@ -321,7 +354,9 @@ a { color: inherit; text-decoration: none; }
   .videos__grid::after { display: none; }
 
   /* ~340px cards: 3 fit with the 4th just peeking in */
-  .videos__grid .tiktok-embed {
+  .videos__grid .tiktok-embed,
+  .videos__grid .tiktok-card,
+  .videos__grid .tiktok-fallback {
     flex: 0 0 340px;
     width: 340px;
   }
