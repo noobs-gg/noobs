@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game over | noobs</title>
+  <meta name="robots" content="noindex">
+
+  <!-- Google Fonts: League Spartan 500, 600, 800 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=League+Spartan:wght@500;600;800&display=swap" rel="stylesheet">
+
+  <!-- Favicons -->
+  <link rel="icon" href="favicons/favicon.ico" sizes="any">
+  <link rel="icon" href="favicons/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="icon" href="favicons/favicon-512.png" type="image/png" sizes="512x512">
+  <link rel="apple-touch-icon" href="favicons/apple-touch-icon-180.png">
+
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .error-page {
+      min-height: 100svh;
+      background: var(--cream);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3.5rem var(--px);
+    }
+
+    .error-page__inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 1.5rem;
+      max-width: 420px;
+    }
+
+    .error-page__nubi {
+      width: 160px;
+      height: auto;
+      image-rendering: pixelated;
+    }
+
+    .error-page__heading {
+      font-weight: 800;
+      font-size: clamp(2.5rem, 8vw, 4rem);
+      letter-spacing: -0.04em;
+      line-height: 1;
+      color: var(--navy);
+    }
+
+    .error-page__text {
+      font-weight: 500;
+      font-size: 1.125rem;
+      color: var(--navy);
+      opacity: 0.6;
+      margin-top: -0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+  <main class="error-page">
+    <div class="error-page__inner">
+      <img src="nubi-pixel-idle/nubi-pixel-idle.gif" alt="" class="error-page__nubi" aria-hidden="true">
+      <h1 class="error-page__heading">Game over</h1>
+      <p class="error-page__text">This page doesn't exist.</p>
+      <a href="/" class="btn btn--primary">Press start</a>
+    </div>
+  </main>
+
+</body>
+</html>
