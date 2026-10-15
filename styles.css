@@ -271,79 +271,51 @@ a { color: inherit; text-decoration: none; }
   scroll-snap-type: x mandatory;
   -webkit-overflow-scrolling: touch;
   padding-bottom: 1rem;
-  /* allow cards to bleed to the right edge */
+  /* bleed cards to viewport edges */
   padding-inline: var(--px);
   margin-inline: calc(-1 * var(--px));
+  /* hide scrollbar */
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-/* Hide scrollbar but keep scrollability */
 .videos__grid::-webkit-scrollbar { display: none; }
-.videos__grid { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* Placeholder card: 9:16 portrait */
-.video-card--placeholder {
-  flex: 0 0 72vw;
-  max-width: 260px;
-  min-height: 400px;
+/* Trailing spacer so the last card clears the right edge on iOS */
+.videos__grid::after {
+  content: '';
+  flex: 0 0 1px;
+}
+
+/* Each TikTok embed is a carousel card */
+.videos__grid .tiktok-embed {
+  flex: 0 0 max(85vw, 325px);
+  width: max(85vw, 325px);
   scroll-snap-align: start;
-  background: var(--cream);
   border-radius: 18px;
-  border: 2px solid rgba(37, 42, 92, 0.07);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  aspect-ratio: 9 / 16;
-}
-
-.video-card__inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  padding: 2rem 1.5rem;
-  text-align: center;
-}
-
-.video-card__icon {
-  width: 38px;
-  height: 38px;
-  color: var(--pink);
-  opacity: 0.5;
-}
-
-.video-card__label {
-  font-weight: 600;
-  font-size: 0.72rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--navy);
-  opacity: 0.45;
+  overflow: hidden;
+  border: none !important;
 }
 
 /* Desktop: 3-column grid */
-@media (min-width: 640px) {
+@media (min-width: 900px) {
   .videos__grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
     overflow-x: visible;
     padding-inline: 0;
     margin-inline: 0;
     padding-bottom: 0;
   }
 
-  .video-card--placeholder {
-    flex: none;
-    max-width: none;
-    min-height: unset;
-  }
-}
+  .videos__grid::after { display: none; }
 
-/* Real TikTok embeds inherit the grid cell */
-.videos__grid .tiktok-embed {
-  width: 100%;
-  border-radius: 18px;
-  overflow: hidden;
-  border: none !important;
+  .videos__grid .tiktok-embed {
+    flex: none;
+    width: 100%;
+    scroll-snap-align: none;
+  }
 }
 
 /* ── ABOUT ──────────────────────────────────────────────── */
