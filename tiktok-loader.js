@@ -1,5 +1,5 @@
 /* tiktok-loader.js
-   Lazy-loads TikTok embeds one at a time as they approach the carousel,
+   Lazy-loads TikTok embeds as they enter the carousel's scroll port,
    patches the iframe allow attribute, retries failures, shows a fallback. */
 
 (function () {
@@ -38,31 +38,29 @@
     if (window.tiktokEmbed && window.tiktokEmbed.lib) {
       try { window.tiktokEmbed.lib.render(el); return; } catch (_) {}
     }
-    /* Fallback: inject a fresh (cached) script tag so TikTok processes
-       any newly added .tiktok-embed elements it hasn't seen yet. */
+    /* Fallback: fresh cached script tag so TikTok re-scans for new elements. */
     var s = document.createElement('script');
     s.src = EMBED_SRC;
     s.async = true;
     document.head.appendChild(s);
   }
 
-  /* ── Patch the iframe allow attribute once TikTok injects it ────────────── */
+  /* ── Patch the iframe allow attribute ───────────────────────────────────── */
   var ALLOW = 'autoplay; fullscreen; encrypted-media; picture-in-picture';
 
   function patchIframe(iframe) {
-    var existing = (iframe.getAttribute('allow') || '').split(';')
-                     .map(function (s) { return s.trim(); }).filter(Boolean);
-    ALLOW.split(';').forEach(function (directive) {
-      var d = directive.trim();
-      if (existing.indexOf(d) === -1) existing.push(d);
+    var parts = (iframe.getAttribute('allow') || '').split(';')
+                  .map(function (s) { return s.trim(); }).filter(Boolean);
+    ALLOW.split(';').forEach(function (d) {
+      d = d.trim();
+      if (parts.indexOf(d) === -1) parts.push(d);
     });
-    iframe.setAttribute('allow', existing.join('; '));
+    iframe.setAttribute('allow', parts.join('; '));
   }
 
   function watchForIframe(el) {
     var iframe = el.querySelector('iframe');
     if (iframe) { patchIframe(iframe); return; }
-
     var mo = new MutationObserver(function () {
       var found = el.querySelector('iframe');
       if (found) { mo.disconnect(); patchIframe(found); }
@@ -70,42 +68,50 @@
     mo.observe(el, { childList: true, subtree: true });
   }
 
-  /* ── Did the embed produce an iframe? ────────────────────────────────────── */
+  /* ── Helpers ─────────────────────────────────────────────────────────────── */
   function hasIframe(el) { return !!el.querySelector('iframe'); }
-
-  /* ── Escape helpers ──────────────────────────────────────────────────────── */
   function escAttr(s) { return String(s).replace(/"/g, '&quot;'); }
   function escHtml(s) {
     return String(s)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   }
 
-  /* ── Fallback card (shown after all retries fail) ────────────────────────── */
+  /* ── Fallback card ───────────────────────────────────────────────────────── */
+  /* io is declared below; showFallback is only ever called from async
+     setTimeout callbacks, so io is always assigned by then. */
+  var io;
+
   function showFallback(el) {
-    var url   = escAttr(el.getAttribute('cite') || '#');
-    var title = escHtml(el.getAttribute('data-title') || 'Watch on TikTok');
+    var cite  = el.getAttribute('cite') || '#';
+    var vid   = el.getAttribute('data-video-id') || '';
+    var title = el.getAttribute('data-title') || '';
     var fb    = document.createElement('div');
     fb.className = 'tiktok-fallback';
+    /* Store embed data so the observer can retry when it scrolls back in. */
+    fb.setAttribute('data-cite',     cite);
+    fb.setAttribute('data-video-id', vid);
+    fb.setAttribute('data-title',    title);
     fb.innerHTML =
       '<div class="tiktok-fallback__inner">' +
-        '<p class="tiktok-fallback__title">' + title + '</p>' +
-        '<a href="' + url + '" target="_blank" rel="noopener noreferrer"' +
+        '<p class="tiktok-fallback__title">' +
+          escHtml(title || 'Watch on TikTok') +
+        '</p>' +
+        '<a href="' + escAttr(cite) + '" target="_blank" rel="noopener noreferrer"' +
            ' class="btn btn--primary">Watch on TikTok</a>' +
       '</div>';
-    if (el.parentNode) el.parentNode.replaceChild(fb, el);
+    if (el.parentNode) {
+      el.parentNode.replaceChild(fb, el);
+      io.observe(fb);  /* re-observe — scrolling into view triggers a retry */
+    }
   }
 
   /* ── Check + retry loop ──────────────────────────────────────────────────── */
   function scheduleCheck(el, retriesLeft) {
     setTimeout(function () {
-      if (!el.parentNode)  return;  // element replaced or removed — stop
-      if (hasIframe(el))   return;  // loaded successfully — stop
+      if (!el.parentNode) return;  /* element replaced or removed */
+      if (hasIframe(el))  return;  /* loaded successfully */
 
       if (retriesLeft > 0) {
-        /* Replace with a completely fresh node — TikTok skips elements it
-           has already processed, so a brand-new node forces re-processing. */
         var next = document.createElement('blockquote');
         next.className = 'tiktok-embed';
         next.setAttribute('cite',          el.getAttribute('cite'));
@@ -126,7 +132,6 @@
   function activate(el) {
     el.className = 'tiktok-embed';
     el.innerHTML = '<section></section>';
-
     withScript(function () {
       watchForIframe(el);
       render(el);
@@ -134,20 +139,35 @@
     });
   }
 
-  /* ── IntersectionObserver: lazy-init cards as they near the viewport ─────── */
+  /* ── IntersectionObserver ────────────────────────────────────────────────── */
+  var grid  = document.querySelector('.videos__grid');
   var cards = document.querySelectorAll('.tiktok-card');
-  if (!cards.length) return;
+  if (!grid || !cards.length) return;
 
-  var io = new IntersectionObserver(function (entries) {
+  io = new IntersectionObserver(function (entries) {
     entries.forEach(function (entry) {
       if (!entry.isIntersecting) return;
       io.unobserve(entry.target);
-      activate(entry.target);
+
+      var t = entry.target;
+
+      if (t.classList.contains('tiktok-fallback')) {
+        /* Retry: replace the fallback with a fresh pending card and activate. */
+        var bq = document.createElement('blockquote');
+        bq.className = 'tiktok-card';
+        bq.setAttribute('cite',          t.getAttribute('data-cite') || '');
+        bq.setAttribute('data-video-id', t.getAttribute('data-video-id') || '');
+        bq.setAttribute('data-title',    t.getAttribute('data-title') || '');
+        bq.innerHTML = '<section></section>';
+        if (t.parentNode) t.parentNode.replaceChild(bq, t);
+        activate(bq);
+      } else {
+        activate(t);
+      }
     });
   }, {
-    /* Fire when a card comes within 300px of the visible carousel area
-       so it starts loading before the user swipes to it. */
-    rootMargin: '0px 300px 0px 300px'
+    root:       grid,          /* scoped to the carousel, not the whole page */
+    rootMargin: '0px 200px 0px 200px'  /* pre-load one card ahead */
   });
 
   cards.forEach(function (el) { io.observe(el); });

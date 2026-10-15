@@ -279,6 +279,8 @@ a { color: inherit; text-decoration: none; }
   /* bleed to viewport edges on mobile */
   padding-inline: var(--px);
   margin-inline: calc(-1 * var(--px));
+  /* align snap to the inset edge, not the bleed edge */
+  scroll-padding-inline-start: var(--px);
   /* hide scrollbar */
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -356,6 +358,7 @@ a { color: inherit; text-decoration: none; }
     padding-inline: 0;
     margin-inline: 0;
     padding-bottom: 0.5rem;
+    scroll-padding-inline-start: 0;
   }
 
   .videos__grid::after { display: none; }
