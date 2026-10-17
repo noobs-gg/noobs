@@ -507,22 +507,15 @@ a { color: inherit; text-decoration: none; }
 }
 
 
-/* Desktop footer: plum strip + overlay brand + socials */
+/* Desktop footer: plum strip above landscape */
 @media (min-width: 700px) {
   .footer {
-    position: relative;
-    padding-top: 36px;
+    padding-top: 28px;
   }
 
   .footer__inner {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1;
-    height: 36px;
-    padding: 0;
-    align-items: center;
+    padding-top: 0;
+    padding-bottom: 20px;
   }
 
   .footer__landscape-img {
