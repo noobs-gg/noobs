@@ -325,7 +325,28 @@ a { color: inherit; text-decoration: none; }
 /* ── ABOUT ──────────────────────────────────────────────── */
 .about {
   background: var(--plum);
-  padding: 5.5rem 0 2.5rem;
+  padding: 5.5rem 0 14rem; /* extra bottom padding for mobile crowd */
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* Mobile default: crowd peeks up from the bottom edge */
+.about::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 220px;
+  background-image: url('nubi-alts/nubi-crowd.png');
+  background-size: cover;
+  background-position: center top;
+  opacity: 0.9;
+  mask-image: linear-gradient(to bottom, transparent 0%, black 55%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 55%);
+  pointer-events: none;
+  z-index: -1;
 }
 
 .about__layout {
@@ -367,6 +388,20 @@ a { color: inherit; text-decoration: none; }
 
 @media (min-width: 768px) {
   .about { padding-bottom: 5.5rem; }
+
+  /* Desktop: crowd fills right half, fades towards centre */
+  .about::after {
+    top: 50%;
+    left: auto;
+    bottom: auto;
+    right: 0;
+    transform: translateY(-50%);
+    width: 55%;
+    height: 120%;
+    background-position: center center;
+    mask-image: linear-gradient(to right, transparent 0%, black 45%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 45%);
+  }
 
   .about__layout {
     flex-direction: row;
