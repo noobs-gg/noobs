@@ -325,28 +325,35 @@ a { color: inherit; text-decoration: none; }
 /* ── ABOUT ──────────────────────────────────────────────── */
 .about {
   background: var(--plum);
-  padding: 5.5rem 0 14rem; /* extra bottom padding for mobile crowd */
+  padding: 5.5rem 0 280px; /* bottom padding for mobile crowd */
   position: relative;
   overflow: hidden;
-  isolation: isolate;
+  z-index: 0; /* own stacking context so crowd sits behind text */
 }
 
-/* Mobile default: crowd peeks up from the bottom edge */
+/* Mobile: crowd 130vw wide, anchored at bottom, fades to transparent upward */
 .about::after {
   content: '';
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 220px;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 130vw;
+  height: 320px;
   background-image: url('nubi-alts/nubi-crowd.png');
   background-size: cover;
-  background-position: center top;
+  background-position: center center;
   opacity: 0.9;
-  mask-image: linear-gradient(to bottom, transparent 0%, black 55%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 55%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 60%);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 60%);
   pointer-events: none;
-  z-index: -1;
+  z-index: 0;
+}
+
+/* Keep text above the crowd background */
+.about .container {
+  position: relative;
+  z-index: 1;
 }
 
 .about__layout {
