@@ -547,15 +547,17 @@ a { color: inherit; text-decoration: none; }
     padding-inline: 24px;
   }
 
-  /* Contact card: move pixel Nubi badge fully inside the card */
+  /* Contact card: perch badge on top-right corner, matching desktop */
   .contact__nubi {
-    top: 16px;
-    right: 16px;
+    top: -18px;
+    right: -10px;
     width: 56px;
   }
 
-  /* Prevent card text from running under the badge */
+  /* Give the card a right margin so the -10px badge overhang stays on-screen */
+  /* and keep right padding so text doesn't run under the badge */
   .contact__item {
+    margin-right: 14px;
     padding-right: 80px;
   }
 }
